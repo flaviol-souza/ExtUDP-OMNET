@@ -15,40 +15,34 @@
 
 package extudp_omnet.simulations;
 
-import extudp_omnet.UDPServer;
-import extudp_omnet.Cloud;
-import extudp_omnet.ExtUDPClient;
-import extudp_omnet.UDPClient;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.nodes.inet.StandardHost;
+import inet.applications.udpapp.UDPEchoApp;
+import inet.applications.udpapp.UDPBasicApp;
+import inet.nodes.inet.Router;
 
 network UDPNet
-{
+{        
     parameters:
-        int numClients @prompt("Number of clients") = default(1);
+        int numClients = default(1);
     submodules:
-        server: UDPServer {
-            parameters:
-                @display("p=426,178");
+        configurator: IPv4NetworkConfigurator {
+            @display("p=50,50");
         }
-        cloud: Cloud {
+        server: StandardHost {
             parameters:
-                @display("p=274,182");
-            gates:
-                g[numClients+2];
+                numUdpApps = 1;
+                @display("p=300,200");
         }
-        extClient: ExtUDPClient {
+        clients[numClients]: StandardHost {
             parameters:
-                addr = 1;
-                srvAddr = 0;
-                @display("p=102,92;t=Run the simulation\\, then start: udp localhost 4560 Then if on Unix\\, type: Ctrl+] ``mode character''");
+                numUdpApps = 1;
+                @display("p=100,200");
         }
-        client[numClients]: UDPClient {
-            parameters:
-                addr = 2+index;
-                srvAddr = 0;
-                @display("p=102,162,col");
+        router: Router {
+            @display("p=200,100");
         }
     connections:
-        server.g <--> cloud.g[0];
-        extClient.g <--> cloud.g[1];
-        client[i].g <--> cloud.g[i+2] for i=0..numClients-1;
+        server.pppg++ <--> { delay = 1ms; datarate = 100Mbps; } <--> router.pppg++;
+        clients[i].pppg++ <--> { delay = 1ms; datarate = 100Mbps; } <--> router.pppg++ for i=0..numClients-1;
 }

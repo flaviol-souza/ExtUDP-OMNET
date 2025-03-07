@@ -1,29 +1,26 @@
 import socket
 
-def client_program():
-    host = '127.0.0.1'  # IP address of the OMNeT++ UDP server
-    port = 4560         # Port number where the OMNeT++ server listens
+def udp_client():
+    server_address = ('127.0.0.1', 4560)  # Conectando diretamente à simulação
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP socket
+    try:
+        while True:
+            message = input("Digite a mensagem (ou 'bye' para sair): ")
+            if message.lower() == 'bye':
+                break
 
-    message = input(" -> ")  # User input
+            print(f"Enviando: {message}")
+            client_socket.sendto(message.encode(), server_address)
 
-    while message.lower().strip() != 'bye':
-        try:
-            print('Sending msg to the server:', message)
-            client_socket.sendto(message.encode(), (host, port))  # Send UDP message
-        except Exception as e:
-            print(e)
-        try:
-            print('waiting answer from server')
-            data, server_address = client_socket.recvfrom(1024)  # Receive UDP response
-            print('Received from server:', data.decode())  # Display server response
-        except socket.timeout:
-            print("No response from server")
+            data, _ = client_socket.recvfrom(1024)  # Espera resposta do OMNeT++
+            print(f"Recebido do servidor: {data.decode()}")
 
-        message = input(" -> ")  # Get next user input
+    except KeyboardInterrupt:
+        print("\nEncerrando cliente.")
 
-    client_socket.close()  # Close the socket
+    finally:
+        client_socket.close()
 
 if __name__ == '__main__':
-    client_program()
+    udp_client()
