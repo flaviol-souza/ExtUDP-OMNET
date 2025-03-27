@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for ExtUDP-OMNET
 #
 # This file was generated with the command:
-#  opp_makemake -f --deep -I../../inet/src/transport/tcp_common -I../../inet/src/base -I../../inet/src/util -I../../inet/src/linklayer/ieee80211/mac -I../../inet/src/transport/udp -I../../inet/src/linklayer/ieee80211/radio/errormodel -I../../inet/src/util/headerserializers -I../../inet/src/linklayer/ieee80211/radio -I../../inet/src/status -I../../inet/src/transport/sctp -I../../inet/src/networklayer/icmpv6 -I../../inet/src/linklayer/radio/propagation -I../../inet/src/transport/contract -I../../inet/src/networklayer/ipv6tunneling -I../../inet/src/world/radio -I../../inet/src/linklayer/contract -I../../inet/src/util/headerserializers/udp -I../../inet/src/util/headerserializers/tcp -I../../inet/src/linklayer/radio -I../../inet/src/world/obstacles -I../../inet/src/networklayer/common -I../../inet/src/networklayer/ipv6 -I../../inet/src/networklayer/arp -I../../inet/src/networklayer/routing/aodv -I../../inet/src/networklayer/contract -I../../inet/src -I../../inet/src/networklayer/xmipv6 -I../../inet/src/util/headerserializers/sctp -I../../inet/src/util/headerserializers/ipv6 -I../../inet/src/battery/models -I../../inet/src/networklayer/autorouting/ipv4 -I../../inet/src/networklayer/ipv4 -I../../inet/src/mobility/contract -I../../inet/src/applications/pingapp -I../../inet/src/linklayer/common -I../../inet/src/util/headerserializers/ipv4 -L../../inet/out/$$\(CONFIGNAME\)/src -linet -DINET_IMPORT -KINET_PROJ=../../inet
+#  opp_makemake -f --deep -I../../inet/src/transport/tcp_common -I../../inet/src/base -I../../inet/src/util -I../../inet/src/applications/common -I../../inet/src/linklayer/ieee80211/mac -I../../inet/src/applications/udpapp -I../../inet/src/transport/udp -I../../inet/src/linklayer/ieee80211/radio/errormodel -I../../inet/src/util/headerserializers -I../../inet/src/linklayer/ieee80211/radio -I../../inet/src/status -I../../inet/src/transport/sctp -I../../inet/src/networklayer/icmpv6 -I../../inet/src/linklayer/radio/propagation -I../../inet/src/transport/contract -I../../inet/src/networklayer/ipv6tunneling -I../../inet/src/world/radio -I../../inet/src/linklayer/contract -I../../inet/src/util/headerserializers/udp -I../../inet/src/util/headerserializers/tcp -I../../inet/src/linklayer/radio -I../../inet/src/world/obstacles -I../../inet/src/networklayer/common -I../../inet/src/networklayer/ipv6 -I../../inet/src/networklayer/arp -I../../inet/src/networklayer/routing/aodv -I../../inet/src/networklayer/contract -I../../inet/src -I../../inet/src/networklayer/xmipv6 -I../../inet/src/util/headerserializers/sctp -I../../inet/src/util/headerserializers/ipv6 -I../../inet/src/battery/models -I../../inet/src/networklayer/autorouting/ipv4 -I../../inet/src/networklayer/ipv4 -I../../inet/src/mobility/contract -I../../inet/src/applications/pingapp -I../../inet/src/linklayer/common -I../../inet/src/util/headerserializers/ipv4 -L../../inet/out/$$\(CONFIGNAME\)/src -linet -DINET_IMPORT -KINET_PROJ=../../inet
 #
 
 # Name of target to be created (-o option)
@@ -18,7 +18,9 @@ INCLUDE_PATH = \
     -I../../inet/src/transport/tcp_common \
     -I../../inet/src/base \
     -I../../inet/src/util \
+    -I../../inet/src/applications/common \
     -I../../inet/src/linklayer/ieee80211/mac \
+    -I../../inet/src/applications/udpapp \
     -I../../inet/src/transport/udp \
     -I../../inet/src/linklayer/ieee80211/radio/errormodel \
     -I../../inet/src/util/headerserializers \
@@ -66,20 +68,10 @@ PROJECTRELATIVE_PATH = src
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
-OBJS = \
-    $O/UDPClient.o \
-    $O/ExtUDPClient.o \
-    $O/SocketRTScheduler.o \
-    $O/Cloud.o \
-    $O/QueueBase.o \
-    $O/UDPServer.o \
-    $O/UDPPkt_m.o \
-    $O/NetPkt_m.o
+OBJS = $O/UDPClient.o $O/UDPServer.o
 
 # Message files
-MSGFILES = \
-    UDPPkt.msg \
-    NetPkt.msg
+MSGFILES =
 
 # Other makefile variables (-K)
 INET_PROJ=../../inet
@@ -165,38 +157,35 @@ depend:
 	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-$O/Cloud.o: Cloud.cc \
-	Cloud.h \
-	NetPkt_m.h
-$O/ExtUDPClient.o: ExtUDPClient.cc \
-	ExtUDPClient.h \
-	NetPkt_m.h \
-	SocketRTScheduler.h \
-	UDPPkt_m.h
-$O/NetPkt_m.o: NetPkt_m.cc \
-	NetPkt_m.h
-$O/QueueBase.o: QueueBase.cc \
-	QueueBase.h \
-	$(INET_PROJ)/src/base/AbstractQueue.h \
-	$(INET_PROJ)/src/base/Compat.h \
-	$(INET_PROJ)/src/base/INETDefs.h \
-	$(INET_PROJ)/src/base/QueueBase.h
-$O/SocketRTScheduler.o: SocketRTScheduler.cc \
-	SocketRTScheduler.h
 $O/UDPClient.o: UDPClient.cc \
-	NetPkt_m.h \
 	UDPClient.h \
-	UDPPkt_m.h
-$O/UDPPkt_m.o: UDPPkt_m.cc \
-	NetPkt_m.h \
-	UDPPkt_m.h
-$O/UDPServer.o: UDPServer.cc \
-	NetPkt_m.h \
-	QueueBase.h \
-	UDPPkt_m.h \
-	UDPServer.h \
-	$(INET_PROJ)/src/base/AbstractQueue.h \
+	$(INET_PROJ)/src/applications/common/ApplicationBase.h \
+	$(INET_PROJ)/src/applications/udpapp/UDPBasicApp.h \
 	$(INET_PROJ)/src/base/Compat.h \
+	$(INET_PROJ)/src/base/ILifecycle.h \
 	$(INET_PROJ)/src/base/INETDefs.h \
-	$(INET_PROJ)/src/base/QueueBase.h
+	$(INET_PROJ)/src/base/LifecycleOperation.h \
+	$(INET_PROJ)/src/base/NodeOperations.h \
+	$(INET_PROJ)/src/base/OperationalBase.h \
+	$(INET_PROJ)/src/networklayer/contract/IPv4Address.h \
+	$(INET_PROJ)/src/networklayer/contract/IPv6Address.h \
+	$(INET_PROJ)/src/networklayer/contract/IPvXAddress.h \
+	$(INET_PROJ)/src/networklayer/contract/IPvXAddressResolver.h \
+	$(INET_PROJ)/src/transport/contract/UDPControlInfo_m.h \
+	$(INET_PROJ)/src/transport/contract/UDPSocket.h
+$O/UDPServer.o: UDPServer.cc \
+	UDPServer.h \
+	$(INET_PROJ)/src/applications/common/ApplicationBase.h \
+	$(INET_PROJ)/src/applications/udpapp/UDPBasicApp.h \
+	$(INET_PROJ)/src/base/Compat.h \
+	$(INET_PROJ)/src/base/ILifecycle.h \
+	$(INET_PROJ)/src/base/INETDefs.h \
+	$(INET_PROJ)/src/base/LifecycleOperation.h \
+	$(INET_PROJ)/src/base/NodeOperations.h \
+	$(INET_PROJ)/src/base/OperationalBase.h \
+	$(INET_PROJ)/src/networklayer/contract/IPv4Address.h \
+	$(INET_PROJ)/src/networklayer/contract/IPv6Address.h \
+	$(INET_PROJ)/src/networklayer/contract/IPvXAddress.h \
+	$(INET_PROJ)/src/transport/contract/UDPControlInfo_m.h \
+	$(INET_PROJ)/src/transport/contract/UDPSocket.h
 

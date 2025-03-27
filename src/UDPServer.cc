@@ -1,53 +1,58 @@
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
-
-#include <ctype.h>
 #include "UDPServer.h"
-#include "UDPPkt_m.h"
-
+#include "UDPSocket.h"
+#include "UDPControlInfo_m.h"
 
 Define_Module(UDPServer);
 
-simtime_t UDPServer::startService(cMessage *msg)
+void UDPServer::initialize(int stage)
 {
-    EV << "Starting service of " << msg->getName() << endl;
-    return par("serviceTime").doubleValue();
+    EV << "UDPServer initialized stage: " << stage << endl;
+    UDPBasicApp::initialize(stage);
+    if (stage == 0) {
+        EV << "UDPServer initialized on port: " << localPort << endl;
+    }
 }
 
-void UDPServer::endService(cMessage *msg)
+
+void UDPServer::processPacket(cPacket *pk)
 {
-    EV << "Completed service of " << msg->getName() << endl;
+    EV << "Received packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
 
-    UDPPkt *udpPkt = check_and_cast<UDPPkt *>(msg);
+    if (pk->getKind() == UDP_I_ERROR)
+    {
+        // ICMP error report -- discard it
+        delete pk;
+    }
+    else if (pk->getKind() == UDP_I_DATA)
+    {
+        // statistics
+        numReceived++;
+        emit(sentPkSignal, pk);
 
-    std::string reply = processChars(udpPkt->getPayload());
-    udpPkt->setPayload(reply.c_str());
-    udpPkt->setName(reply.c_str());
+        // determine its source address/port
+        UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(pk->removeControlInfo());
+        IPvXAddress srcAddr = ctrl->getSrcAddr();
+        int srcPort = ctrl->getSrcPort();
+        delete ctrl;
 
-    int clientAddr = udpPkt->getSrcAddress();
-    int srvAddr = udpPkt->getDestAddress();
-    udpPkt->setDestAddress(clientAddr);
-    udpPkt->setSrcAddress(srvAddr);
+        if (srcAddr.isUnspecified()) {
+            EV << "ERROR: Received packet from unspecified address!" << endl;
+            delete pk;
+            return;
+        }
 
-    send(msg, "g$o");
+        // send back
+        socket.sendTo(pk, srcAddr, srcPort);
+        EV << "UDPServer received a packet. Sending reply.\n";
+    }
+    else
+    {
+        throw cRuntimeError("Message received with unexpected message kind = %d", pk->getKind());
+    }
 }
 
-std::string UDPServer::processChars(const char *chars)
+void UDPServer::finish()
 {
-    std::string s = chars;
-    for (unsigned int i = 0; i < s.length(); i++)
-        s.at(i) = toupper(s.at(i));
-    return s;
+    ApplicationBase::finish();
 }
+

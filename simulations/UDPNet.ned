@@ -1,48 +1,38 @@
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
-
 package extudp_omnet.simulations;
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.StandardHost;
-import inet.applications.udpapp.UDPEchoApp;
-import inet.applications.udpapp.UDPBasicApp;
 import inet.nodes.inet.Router;
+import inet.nodes.inet.StandardHost;
+import inet.util.ThruputMeteringChannel;
 
 network UDPNet
 {        
     parameters:
-        int numClients = default(1);
+        int n;
+        @display("bgb=593,356");
+    types:
+        channel ethernetline extends ThruputMeteringChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
+            thruputDisplayFormat = "u";
+        }
     submodules:
-        configurator: IPv4NetworkConfigurator {
-            @display("p=50,50");
+        router: Router {
+            @display("p=282,182");
+        }
+        client[n]: StandardHost {
+            @display("i=device/laptop;p=144,299,r");
         }
         server: StandardHost {
-            parameters:
-                numUdpApps = 1;
-                @display("p=300,200");
+            @display("p=282,47;i=device/server_l");
         }
-        clients[numClients]: StandardHost {
-            parameters:
-                numUdpApps = 1;
-                @display("p=100,200");
-        }
-        router: Router {
-            @display("p=200,100");
+        configurator: IPv4NetworkConfigurator {
+            @display("p=75,47");
         }
     connections:
-        server.pppg++ <--> { delay = 1ms; datarate = 100Mbps; } <--> router.pppg++;
-        clients[i].pppg++ <--> { delay = 1ms; datarate = 100Mbps; } <--> router.pppg++ for i=0..numClients-1;
+        for i=0..n-1 {
+            client[i].ethg++ <--> ethernetline <--> router.ethg++;
+        }
+        router.pppg++ <--> ethernetline <--> server.pppg++;
 }
